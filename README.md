@@ -5,7 +5,7 @@ CIS 192 Final Project
 
 Proposal:
 
-    Our proposal is to improve and deploy our application from PennApps, ZeitPlanner. The purpose of ZeitPlanner is to help Penn students plan out optimal schedules given a set of classes. They can choose from a variety of criteria to indicate their preferences. We hope this application can be a time-saver as well as offer users reassurance that they have the optimal schedule.
+  Our proposal is to improve and deploy our application from PennApps, ZeitPlanner. The purpose of ZeitPlanner is to help Penn students plan out optimal schedules given a set of classes. They can choose from a variety of criteria to indicate their preferences. We hope this application can be a time-saver as well as offer users reassurance that they have the optimal schedule.
 
 Current State:
 
