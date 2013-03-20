@@ -3,15 +3,15 @@ ZeitPlanner
 
 CIS 192 Final Project
 
-*Proposal:*
+**Proposal:**
 
 Our proposal is to improve and deploy our application from PennApps, ZeitPlanner. The purpose of ZeitPlanner is to help Penn students plan out optimal schedules given a set of classes. They can choose from a variety of criteria to indicate their preferences. We hope this application can be a time-saver as well as offer users reassurance that they have the optimal schedule.
 
-Current State:
+**Current State:**
 
 ZeitPlanner is currently written in JavaScript with HTML and CSS as the front end. It offers the ability to add unlimited courses (by department and code, but not section) as well as a lunch break. The available user preferences are early/late classes, minimizing gaps, minimizing spread, and minimizing class days. We currently use Alex Rattray’s scraper to obtain data and we currently host the webapp on Dylan’s SEAS server, which is vulnerable, private, and slow.
 
-Improvements:
+**Improvements:**
 
 First, we want to write our own scraper in Python. Alex’s solution misses a few key points. It does not handle classes which start on the quarter of the hour, groups (i.e., which recitations are tied to which lectures), classes with different times on different days, classes with different CU values, or TBA locations.
 
