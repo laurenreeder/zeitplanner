@@ -139,22 +139,33 @@ def parse_section(lines):
     section.section_number = match.group("section_number")
     section.instructor = match.group("instructor")
 
-    section.day_time_location_tuples = []
-
     while True:
-        if section.day_time_location_tuples is not None:
+        if section.meetings is not None:
             for match in re.finditer(type_day_time_location_pattern, lines[0]):
                 section.type = match.group("type")
                 # TBA
                 if not match.group("days"):
-                    section.day_time_location_tuples = None
+                    section.meetings = None
                     break
                 else:
                     days = match.group("days")
                     time = match.group("time")
                     location = match.group("location")
-                    day_time_location_tuple = (days, time, location)
-                    section.day_time_location_tuples.append(day_time_location_tuple)
+                    meeting = Meeting()
+                    meeting.days = [c for c in days]
+                    time_pattern = r"(?P<start_hour>\d+):?(?P<start_minute>\d+)?-(?P<end_hour>\d+):?(?P<end_minute>\d+)?(?P<period>AM|PM|NOON)"
+                    time_match = re.match(time_pattern, time)
+                    meeting.start_time = int(time_match.group("start_hour"))
+                    if time_match.group("start_minute"):
+                        meeting.start_time += int(time_match.group("start_minute")) / 60.0
+                    meeting.end_time = int(time_match.group("end_hour"))
+                    if time_match.group("end_minute"):
+                        meeting.end_time += int(time_match.group("end_minute")) / 60.0
+                    if time_match.group("period") == "PM" and meeting.end_time < 12:
+                        if meeting.start_time < meeting.end_time:
+                            meeting.start_time += 12
+                        meeting.end_time += 12
+                    section.add_meeting(meeting)
         lines = lines[1:]
         if not lines or re.match(section_pattern, lines[0]):
             break
@@ -224,6 +235,19 @@ class Section:
         self.instructor = None
         self.instructor_quality = None
         self.type = None
-        self.day_time_location_tuples = None
+        self.meetings = []
+    def add_meeting(self, meeting):
+        self.meetings.append(meeting)
     def __str__(self):
-        return "Section number: %s, Type: %s, Instructor: %s, Day/Time/Location: %s" % (self.section_number, self.type, self.instructor, repr(self.day_time_location_tuples))
+        return "Section number: %s, Type: %s, Instructor: %s, Meetings: %s" % \
+            (self.section_number, self.type, self.instructor, str([str(meeting) for meeting in self.meetings]))
+
+class Meeting:
+    def __init__(self):
+        self.days = []
+        self.start_time = None
+        self.end_time = None
+        self.location = None
+    def __str__(self):
+        return "Days: %s, Start: %s, End: %s, Location: %s" % \
+            (str(self.days), str(self.start_time), str(self.end_time), self.location)
