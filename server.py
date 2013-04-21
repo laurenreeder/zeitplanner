@@ -9,7 +9,7 @@ import data_scraper, scheduler
 
 app = Flask(__name__)
 
-course_data = None
+COURSE_DATA = None
 
 @app.route("/")
 def index():
@@ -24,9 +24,15 @@ def schedule():
     	return "Input %s was valid." % (str(request.form))
 
 def validate(form):
+    """Returns {result: {courses : [c1, c2, ...], sections: [s1, s2, ...]}} for
+       the given form data if all inputs are valid, or returns {error:
+       [key_of_invalid_input_1, key_of_invalid_input_2, ...]} if not."""
 
     # List of parsed courses
     course_list = []
+
+    # List of parsed sections
+    section_list = []
 
     # List of keys whose inputs are invalid
     keys_of_invalid_inputs = []
@@ -43,8 +49,8 @@ def validate(form):
     # valid, or add its key to the list of invalid input keys if not
     for key in form.keys():
 
-    	# Retrieve the form input for the current key, then strip whitespace
-    	# from either end and convert all letters to uppercase
+        # Retrieve the form input for the current key, then strip whitespace
+        # from either end and convert all letters to uppercase
         course_input = form[key].strip().upper()
 
         # Match the input field against the course_pattern
@@ -81,9 +87,9 @@ def validate(form):
                     keys_of_invalid_inputs.append(key)
                     continue
 
-                # If the section was valid, add it to the course list
+                # If the section was valid, add it to the section list
                 else:
-                    course_list.append(section)
+                    section_list.append(section)
 
             # If no section was specified, add the course to the course list
             else:
@@ -101,7 +107,7 @@ def validate(form):
 
     # Otherwise, return the course list
     else:
-        response["result"] = course_list
+        response["result"] = {"courses": course_list, "sections": section_list}
 
     return response
 
@@ -112,12 +118,16 @@ if __name__ == "__main__":
 
     # If not, scrape the course data and store it locally
     if not os.path.exists("course_data.pickle"):
-        course_data = data_scraper.parse_course_data()
-        pickle.dump(course_data, open("course_data.pickle", "w"))
+        COURSE_DATA = data_scraper.parse_course_data()
+        pickle.dump(COURSE_DATA, open("course_data.pickle", "w"))
 
     # Otherwise, load the course data
     else:
-        course_data = pickle.load(open("course_data.pickle", "r"))
+        COURSE_DATA = pickle.load(open("course_data.pickle", "r"))
+
+    # Set the global COURSE_DATA object in the scheduler module to the
+    # server's COURSE_DATA object
+    scheduler.COURSE_DATA = COURSE_DATA
 
     # Debug mode should be turned off when you are finished
     app.run(debug=True)
