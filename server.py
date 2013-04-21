@@ -17,8 +17,11 @@ def index():
 
 @app.route("/api/schedule/", methods=["POST"])
 def schedule():
-    print course_list
-    return str(request.form)
+    validate_response = validate(request.form)
+    if "error" in validate_response:
+    	return jsonify(validate_response)
+    else:
+    	return "Input %s was valid." % (str(request.form))
 
 def validate(form):
 
@@ -53,6 +56,7 @@ def validate(form):
             # Extract department, course, and section information from the input
             department_match = match.group("dept")
             course_match = match.group("course")
+            section_match = None
             if match.group("section"):
                 section_match = match.group("section")
 
@@ -94,11 +98,12 @@ def validate(form):
     # invalid inputs
     if keys_of_invalid_inputs:
         response["error"] = keys_of_invalid_inputs
-        return jsonify(response)
 
     # Otherwise, return the course list
     else:
-        return course_list
+        response["result"] = course_list
+
+    return response
 
 
 if __name__ == "__main__":
