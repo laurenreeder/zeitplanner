@@ -19,9 +19,13 @@ def index():
 def schedule():
     validate_response = validate(request.form)
     if "error" in validate_response:
-    	return jsonify(validate_response)
+        return jsonify(validate_response)
     else:
-    	return "Input %s was valid." % (str(request.form))
+        course_list = validate_response["result"]["courses"]
+        section_list = validate_response["result"]["sections"]
+        schedules = scheduler.find_schedules(course_list, section_list)
+        # Return rendered template
+        return ""
 
 def validate(form):
     """Returns {result: {courses : [c1, c2, ...], sections: [s1, s2, ...]}} for
@@ -42,8 +46,8 @@ def validate(form):
 
     # Course pattern on which the form inputs are matched
     course_pattern = r"(?P<dept>[A-Z]+)" + \
-                     r"[^A-Z0-9]*(?P<course>\d+)" + \
-                     r"[^A-Z0-9]*(?P<section>\d+)?"
+                     r"[^A-Z\d]*(?P<course>\d+)" + \
+                     r"[^A-Z\d]*(?P<section>\d+)?"
 
     # For each input field, parse it and add it to the course list if it is
     # valid, or add its key to the list of invalid input keys if not
