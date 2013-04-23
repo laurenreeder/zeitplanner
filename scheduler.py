@@ -12,7 +12,7 @@ else:
 
 ##### TEMPORARY - FOR TESTING PURPOSES ONLY #####
 
-def compute_statistics(schedule):
+def compute_statistics(schedule_object):
     earliest_time = 24
     latest_time = 0
 
@@ -22,7 +22,7 @@ def compute_statistics(schedule):
     # Make a list of all the meetings in a schedule
     #meetings = [meeting for meeting in section.meetings for section in schedule]
     meetings = []
-    for section in schedule:
+    for section in schedule_object.schedule:
         for meeting in section.meetings:
             meetings.append(meeting)
 
@@ -50,14 +50,15 @@ def compute_statistics(schedule):
             continue
         for i in range(len(day_classes)-1):
             gap_count += day_classes[i+1][0] - day_classes[i][1]
-    
-    print earliest_time
-    print latest_time
-    print average_start
-    print average_end
-    print days_of_class
-    print gap_count
 
+    # Store the calculated values in the schedule object
+    schedule_object.earliest_time = earliest_time
+    schedule_object.latest_time = latest_time
+    schedule_object.average_start = average_start
+    schedule_object.average_end = average_end
+    schedule_object.gap_count = gap_count
+    schedule_object.days_of_class = days_of_class
+    
 def print_schedule(schedule):
 	schedule_string = ""
 	for section in schedule:
@@ -79,6 +80,54 @@ def find_schedules(course_list, section_list):
         schedule_list.extend(find_schedules_from_section_lists(section_lists))
 
     return schedule_list
+
+def find_best_schedule(schedule_list, primary_preference, secondary_preference):
+    schedule_objects = []
+    # Creates a list of schedule objects from the list of schedules
+    # These objects also have schedule characteristics
+    for possible_schedule in schedule_list[]:
+        schedule_object = Schedule()
+        schedule_object.schedule = possible_schedule
+        compute_statistics(schedule_object)
+        schedule_objects.append(schedule_object)
+
+# Compares two section objects to see which one has earlier classes    
+def compare_early(sec_obj1, sec_obj2):
+    result = sec_obj1.latest_time - sec_obj2.latest_time
+    if result == 0:
+        return sec_obj1.average_end - sec_obj2.average_end
+    return result
+
+# Compares two section objects to see which one has later classes    
+def compare_late(sec_obj1, sec_obj2):
+    result = sec_obj1.earliest_time - sec_obj2.earliest_time
+    if result == 0:
+        return sec_obj1.average_start - sec_obj2.average_start
+    return result
+
+# Compares two section objects to see which one is more compact    
+def compare_compact(sec_obj1, sec_obj2):
+    spread1 = sec_obj1.latest_time - sec_obj1.earliest_time
+    spread2 = sec_obj2.latest_time - sec_obj2.earliest_time
+    return spread1 - spread2
+
+# Compares two section objects to see which one has fewer gaps
+def compare_gaps(sec_obj1, sec_obj2):
+    return sec_obj1.gap_count - sec_obj2.gap_count
+
+# Compares two section objects to see which one has fewer days of class    
+def compare_gaps(sec_obj1, sec_obj2):
+    return sec_obj1.days_of_class - sec_obj2.days_of_class
+
+class Schedule:
+    def __init__(self):
+        self.schedule = []
+        self.earliest_time = 0
+        self.latest_time = 0
+        self.average_start = 0
+        self.average_end = 0
+        self.gap_count = 0
+        self.days_of_class = 0
 
 def generate_group_lists(course_list):
     group_lists = []
