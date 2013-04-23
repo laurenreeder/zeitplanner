@@ -4,8 +4,8 @@
         <title>Penn Scheduler</title>
         <style type="text/css">
             * {
-                font-family:Georgia, sans-serif;
-                text-align:center;
+                font-family: Georgia, sans-serif;
+                text-align: center;
             }
             .centerVertically {
                 display: table-cell;
@@ -55,7 +55,6 @@
                         </form>
                         <script src="jquery.min.js"></script>
                         <script type="text/javascript">
-
                             var counterClasses = 1;
 
                             function addInput(divName) {
@@ -68,7 +67,7 @@
                                 }
                             };
 
-                            $("#form").submit(function(event) {
+                            $("#form").submit(function (event) {
                                 // Stop form from submitting normally
                                 event.preventDefault();
 
@@ -83,13 +82,11 @@
                                     }
                                 });
 
-                                var primaryCompare = $("#primaryCompare").val();
-                                var secondaryCompare = $("#secondaryCompare").val();
                                 var data = {
-                                               "primaryCompare": primaryCompare,
-                                               "secondaryCompare": secondaryCompare,
-                                               "classes": classes
-                                           }
+                                    "primaryCompare": $("#primaryCompare").val(),
+                                    "secondaryCompare": $("#secondaryCompare").val(),
+                                    "classes": classes
+                                }
 
                                 $("#data").html("Loading...");
 
@@ -101,8 +98,7 @@
                                 });
 
                                 function process_result(result) {
-                                    console.log("Data sent: ", data);
-                                    console.log("Result received: ", result);
+                                    // Reset the background color of each input field to white
                                     $("[name*='class']").each(function (i, obj) {
                                         if (obj.type == "text") {
                                             if (obj.name.indexOf("class") != -1) {
@@ -111,13 +107,18 @@
                                             }
                                         }
                                     });
+
+                                    // If there is an error, highlight the invalid fields
                                     if ("error" in result) {
                                         for (var i = 0; i < result["error"].length; i++) {
                                             $("#data").html("Invalid input.");
                                             console.log($("[name='" + result["error"][i] + "']"))
                                             $("[name='" + result["error"][i] + "']").css("background-color", "#FF6666");
                                         }
-                                    } else if ("result" in result) {
+                                    }
+
+                                    // Otherwise, display the result
+                                    else if ("result" in result) {
                                         $("#data").html(result["result"]);
                                     }
                                 }

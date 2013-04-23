@@ -74,7 +74,7 @@ def find_schedules(course_list, section_list, primary_compare, secondary_compare
     
     schedule_list = []
 
-    # TODO: deal with case in which len(course_list) == 0
+    # TODO: handle the case in which len(course_list) == 0
     # This will become necessary when we allow users to request specific sections
 
     # Recursively generates all possible schedules given the input courses
@@ -148,41 +148,45 @@ def can_add_section(new_section, schedule):
     """Determines if new_section can be added to the schedule."""
     return not any(has_conflict(new_section, section) for section in schedule)
     
-def compare_early(sec_obj1, sec_obj2):
+def compare_early(s1, s2):
     """Compares two section objects to see which one has earlier classes."""
-    result = sec_obj1.latest_time - sec_obj2.latest_time
+    result = s1.latest_time - s2.latest_time
     if result == 0:
-        return sec_obj1.average_end - sec_obj2.average_end
+        return s1.average_end - s2.average_end
     return result
 
-def compare_late(sec_obj1, sec_obj2):
+def compare_late(s1, s2):
     """Compares two section objects to see which one has later classes."""
-    result = sec_obj2.earliest_time - sec_obj1.earliest_time
+    result = s2.earliest_time - s1.earliest_time
     if result == 0:
-        return sec_obj2.average_start - sec_obj1.average_start
+        return s2.average_start - s1.average_start
     return result
 
-def compare_compact(sec_obj1, sec_obj2):
+def compare_compact(s1, s2):
     """Compares two section objects to see which one is more compact."""
-    spread1 = sec_obj1.latest_time - sec_obj1.earliest_time
-    spread2 = sec_obj2.latest_time - sec_obj2.earliest_time
+    spread1 = s1.latest_time - s1.earliest_time
+    spread2 = s2.latest_time - s2.earliest_time
     return spread1 - spread2
 
-def compare_gaps(sec_obj1, sec_obj2):
+def compare_gaps(s1, s2):
     """Compares two section objects to see which one has fewer gaps."""
-    return sec_obj1.gap_count - sec_obj2.gap_count
+    return s1.gap_count - s2.gap_count
     
-def compare_days(sec_obj1, sec_obj2):
+def compare_days(s1, s2):
     """Compares two section objects to see which one has fewer days of class."""
-    return sec_obj1.days_of_class - sec_obj2.days_of_class
+    return s1.days_of_class - s2.days_of_class
 
 def compare_generic(s1, s2, primary_compare, secondary_compare):
     """Takes in two comparator functions. Makes decisions based on primary_compare
     first and then uses secondary_compare to break ties."""
+
+    # Compare the schedules using the primary_compare function. If necessary,
+    # use the secondary_compare function as a tiebreaker.
     result = primary_compare(s1, s2)
-    # If the primary comparison is zero, use the secondary comparison as a tiebreaker
     if result == 0:
         result = secondary_compare(s1, s2)
+    
+    # Return the result of the comparison as an integer in the range [-1, 0, 1]
     if result < 0:
         return -1
     elif result == 0:
