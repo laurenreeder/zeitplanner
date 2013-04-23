@@ -6,6 +6,8 @@ from functools import wraps
 from flask import current_app, Flask, jsonify, request, render_template
 import pickle, os, re
 
+import sys
+
 import data_scraper, scheduler
 
 app = Flask(__name__)
@@ -32,17 +34,20 @@ def index():
 @app.route("/api/schedule/", methods=["GET"])
 @support_jsonp
 def schedule():
-    import sys
-    sys.stderr.write("%s\n" % str(request.args))
-    sys.stderr.write("Classes: %s\n" % str(request.args["classes"]))
+
     class_dict = {}
-    for class_string in request.args.getlist("classes"):
-    	sys.stderr.write("Class string is: %s\n" % class_string)
-    	key, value = class_string.split(":")
+    for class_string in request.args.getlist("classes[]"):
+    	key, value = class_string.split(":", 1)
     	class_dict[key] = value
+
+    sys.stderr.write("Args: " + str(request.args))
+    sys.stderr.write("class_dict: " + str(class_dict))
+
     validate_response = validate(class_dict)
+
     if "error" in validate_response:
         return jsonify(validate_response)
+    
     else:
         course_list = validate_response["result"]["courses"]
         section_list = validate_response["result"]["sections"]
@@ -79,6 +84,8 @@ def validate(class_dict):
         # Retrieve the form input for the current key, then strip whitespace
         # from either end and convert all letters to uppercase
         course_input = class_dict[key].strip().upper()
+
+        sys.stderr.write("Course input: "+str(course_input)+"\n")
 
         # Match the input field against the course_pattern
         match = re.match(course_pattern, course_input)
