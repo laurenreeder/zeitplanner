@@ -4,7 +4,7 @@
 
 from functools import wraps
 from flask import current_app, Flask, jsonify, request, render_template
-import pickle, os, re
+import colorsys, math, pickle, os, re
 
 import sys
 
@@ -37,8 +37,8 @@ def schedule():
 
     class_dict = {}
     for class_string in request.args.getlist("classes[]"):
-    	key, value = class_string.split(":", 1)
-    	class_dict[key] = value
+        key, value = class_string.split(":", 1)
+        class_dict[key] = value
 
     sys.stderr.write("Args: " + str(request.args))
     sys.stderr.write("class_dict: " + str(class_dict))
@@ -51,9 +51,104 @@ def schedule():
     else:
         course_list = validate_response["result"]["courses"]
         section_list = validate_response["result"]["sections"]
-        schedules = scheduler.find_schedules(course_list, section_list)
-        # Return rendered template
-        return jsonify({"result": "Classes are valid."})
+        primary_compare = get_comparison_function(request.args["primaryCompare"])
+        secondary_compare = get_comparison_function(request.args["secondaryCompare"])
+        schedules = scheduler.find_schedules(course_list, section_list, primary_compare, secondary_compare)
+        if len(schedules) == 0:
+            html = "No valid schedules could be found."
+        else:
+            html = "Optimized Schedule:<br /><br />" + schedule_to_html(schedules[0])
+            # html += "<br />Random Schedule:<br /><br />" + schedule_to_html(schedules[-1])
+        return jsonify({"result": html})
+
+def get_full_day_name(day):
+    if day == "U":
+        return "Sunday"
+    elif day == "M":
+        return "Monday"
+    elif day == "T":
+        return "Tuesday"
+    elif day == "W":
+        return "Wednesday"
+    elif day == "R":
+        return "Thursday"
+    elif day == "F":
+        return "Friday"
+    elif day == "S":
+        return "Saturday"
+
+import sys
+
+def schedule_to_html(schedule_object):
+    # return ' '.join(["%s-%s-%s" % (section.group.course.department.name, section.group.course.code, section.section_number) for section in schedule.schedule])
+
+    schedule = schedule_object.schedule
+    earliest_start_time = schedule_object.earliest_time
+    latest_end_time = schedule_object.latest_time
+
+    table = {}
+    
+    for day in "MTWRF":
+        table[day] = {}
+        time = earliest_start_time
+        while time < latest_end_time:
+            table[day][time] = ["", 1, [255, 255, 255]]
+            time += 0.5
+
+    hue_increment = 300 / len(schedule)
+    current_hue = 0
+
+    for section in schedule:
+        for meeting in section.meetings:
+            cell_text = "%s-%s-%s" % (section.group.course.department.name, section.group.course.code, section.section_number)
+            num_rows = int((meeting.end_time - meeting.start_time) * 2)
+            rgb = colorsys.hsv_to_rgb(current_hue / 360.0, 1, 1)
+            rgb = [255*value for value in rgb]
+            # transparent_rgb = [255*c for c in rgb] # rgba_to_rgb(rgb[0], rgb[1], rgb[2], 0.3)
+            for day in meeting.days:
+                # table[day][meeting.start_time] = [cell_text, num_rows, transparent_rgb]
+                table[day][meeting.start_time] = [cell_text, num_rows, rgb]
+                time = meeting.start_time + 0.5
+                while time < meeting.end_time:
+                    table[day][time][1] = 0
+                    time += 0.5
+            current_hue += hue_increment
+
+    html_string = ""
+
+    td_with_style = "<td style=\"border:1px solid; padding-left:10px; padding-right:10px\">"
+
+    html_string += "<table align=\"center\" style=\"width:675px; border:3px solid; border-collapse:collapse\">"
+    html_string += "<tr>"
+    html_string += td_with_style + "</td>"
+    for day in "MTWRF":
+        html_string += td_with_style + get_full_day_name(day) + "</td>"
+    html_string += "</tr>"
+    time = earliest_start_time
+    while time < latest_end_time:
+        html_string += "<tr>"
+        html_string += td_with_style + str(int(math.floor(time if time <= 12.5 else time - 12))) + (":00" if time % 1 == 0 else ":30") + "</td>"
+        for day in "MTWRF":
+            num_rows = table[day][time][1]
+            rgb = ",".join(str(int(e)) for e in table[day][time][2])
+            if num_rows != 0:
+                html_string += "<td rowspan=\"" + str(num_rows) + "\" style=\"border:1px solid; padding-left:10px; padding-right:10px; background-color:rgba(" + rgb + ",0.3)\">" + table[day][time][0] + "</td>"
+        html_string += "</tr>"
+        time += 0.5
+
+    return html_string
+
+def get_comparison_function(name):
+    if name == "early":
+        return scheduler.compare_early
+    elif name == "late":
+        return scheduler.compare_late
+    elif name == "compact":
+        return scheduler.compare_compact
+    elif name == "minGaps":
+        return scheduler.compare_gaps
+    elif name == "minDays":
+        return scheduler.compare_days
 
 def validate(class_dict):
     """Returns {result: {courses : [c1, c2, ...], sections: [s1, s2, ...]}} for

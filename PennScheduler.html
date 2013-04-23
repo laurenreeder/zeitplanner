@@ -76,7 +76,9 @@
                                 $("#classes > div > input").each(function (i, obj) {
                                     if (obj.type == "text") {
                                         if (obj.name.indexOf("class") != -1) {
-                                            classes.push(obj.name + ":" + obj.value);
+                                            if (obj.value.trim() != "") {
+                                                classes.push(obj.name + ":" + obj.value);
+                                            }
                                         }
                                     }
                                 });
@@ -99,21 +101,21 @@
                                 function process_result(result) {
                                     console.log("Data sent: ", data);
                                     console.log("Result received: ", result);
-                                    if ("error" in result) {
-                                        $("[name*='class']").each(function (i, obj) {
-                                            if (obj.type == "text") {
-                                                if (obj.name.indexOf("class") != -1) {
-                                                    obj.style.backgroundColor = "#FFFFFF";
-                                                }
+                                    $("[name*='class']").each(function (i, obj) {
+                                        if (obj.type == "text") {
+                                            if (obj.name.indexOf("class") != -1) {
+                                                console.log(obj.name);
+                                                obj.style.backgroundColor = "#FFFFFF";
                                             }
-                                        });
+                                        }
+                                    });
+                                    if ("error" in result) {
                                         for (var i = 0; i < result["error"].length; i++) {
                                             console.log($("[name='" + result["error"][i] + "']"))
                                             $("[name='" + result["error"][i] + "']").css("background-color", "#FF6666");
                                         }
                                     } else if ("result" in result) {
-                                        // $("#data").html("No schedules match your search.");
-                                        $("#data").html("Received a response!");
+                                        $("#data").html(result["result"]);
                                     }
                                 }
 
