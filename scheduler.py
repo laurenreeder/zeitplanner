@@ -85,7 +85,7 @@ def find_best_schedule(schedule_list, primary_preference, secondary_preference):
     schedule_objects = []
     # Creates a list of schedule objects from the list of schedules
     # These objects also have schedule characteristics
-    for possible_schedule in schedule_list[]:
+    for possible_schedule in schedule_list:
         schedule_object = Schedule()
         schedule_object.schedule = possible_schedule
         compute_statistics(schedule_object)
