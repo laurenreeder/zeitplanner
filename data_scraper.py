@@ -273,6 +273,7 @@ class Department:
     
     def add_course(self, course):
         """Adds the given course to the department"""
+        course.department = self
         self.courses[course.code] = course
     
     def get_course(self, code):
@@ -282,6 +283,7 @@ class Department:
 class Course:
     
     def __init__(self):
+        self.department = None
         self.code = None
         self.name = None
         self.credits = None
@@ -290,6 +292,7 @@ class Course:
     
     def add_group(self, group):
         """Adds the given group to the course"""
+        group.course = self
         self.groups.append(group)
     
     def get_group(self, section_number):
@@ -317,12 +320,14 @@ class Course:
 class Group:
     
     def __init__(self):
+        self.course = None
         # sections is a dictionary with entries of the form
         # {type : [section1, section2, ...]}
         self.sections = defaultdict(list)
     
     def add_section(self, section):
         """Adds the given section to the group"""
+        section.group = self
         self.sections[section.type].append(section)
     
     def get_sections(self, type):
@@ -337,6 +342,7 @@ class Group:
 class Section:
     
     def __init__(self):
+        self.group = None
         self.section_number = None
         self.instructor = None
         self.instructor_quality = None
@@ -345,6 +351,7 @@ class Section:
     
     def add_meeting(self, meeting):
         """Adds the given meeting to the section"""
+        meeting.section = self
         self.meetings.append(meeting)
     
     def __str__(self):
@@ -355,6 +362,7 @@ class Section:
 class Meeting:
     
     def __init__(self):
+        self.section = None
         self.days = []
         self.start_time = None
         self.end_time = None
