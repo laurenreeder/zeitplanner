@@ -2,7 +2,8 @@
 #     1) View -> Uncheck "Print Layout"
 #     2) Tools -> Preferences -> Uncheck "Use Smart Quotes"
 
-from flask import Flask, jsonify, request, render_template
+from functools import wraps
+from flask import current_app, Flask, jsonify, request, render_template
 import pickle, os, re
 
 import data_scraper, scheduler
@@ -11,13 +12,35 @@ app = Flask(__name__)
 
 COURSE_DATA = None
 
+# JSONP wrapper from https://gist.github.com/farazdagi/1089923
+def support_jsonp(f):
+    """Wraps JSONified output for JSONP"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        callback = request.args.get('callback', False)
+        if callback:
+            content = str(callback) + '(' + str(f().data) + ')'
+            return current_app.response_class(content, mimetype='application/json')
+        else:
+            return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/api/schedule/", methods=["POST"])
+@app.route("/api/schedule/", methods=["GET"])
+@support_jsonp
 def schedule():
-    validate_response = validate(request.form)
+    import sys
+    sys.stderr.write("%s\n" % str(request.args))
+    sys.stderr.write("Classes: %s\n" % str(request.args["classes"]))
+    class_dict = {}
+    for class_string in request.args.getlist("classes"):
+    	sys.stderr.write("Class string is: %s\n" % class_string)
+    	key, value = class_string.split(":")
+    	class_dict[key] = value
+    validate_response = validate(class_dict)
     if "error" in validate_response:
         return jsonify(validate_response)
     else:
@@ -25,9 +48,9 @@ def schedule():
         section_list = validate_response["result"]["sections"]
         schedules = scheduler.find_schedules(course_list, section_list)
         # Return rendered template
-        return ""
+        return jsonify({"result": "Classes are valid."})
 
-def validate(form):
+def validate(class_dict):
     """Returns {result: {courses : [c1, c2, ...], sections: [s1, s2, ...]}} for
        the given form data if all inputs are valid, or returns {error:
        [key_of_invalid_input_1, key_of_invalid_input_2, ...]} if not."""
@@ -51,11 +74,11 @@ def validate(form):
 
     # For each input field, parse it and add it to the course list if it is
     # valid, or add its key to the list of invalid input keys if not
-    for key in form.keys():
+    for key in class_dict:
 
         # Retrieve the form input for the current key, then strip whitespace
         # from either end and convert all letters to uppercase
-        course_input = form[key].strip().upper()
+        course_input = class_dict[key].strip().upper()
 
         # Match the input field against the course_pattern
         match = re.match(course_pattern, course_input)
@@ -73,7 +96,7 @@ def validate(form):
             # Check if the specified course or section is in the course data
 
             # Check the validity of the department
-            department = course_data.get_department(department_match)
+            department = COURSE_DATA.get_department(department_match)
             if not department:
                 keys_of_invalid_inputs.append(key)
                 continue
