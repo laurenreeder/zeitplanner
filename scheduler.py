@@ -2,6 +2,19 @@ import data_scraper, os, pickle
 
 COURSE_DATA = None
 
+class Schedule:
+    """This class holds a schedule, which is a list of sections, as well as a
+    number of statistics about the schedule. It takes in a schedule as it is
+    initialized and then compute_statistics is called on it."""
+    def __init__(self, schedule):
+        self.schedule = schedule
+        self.earliest_time = 0
+        self.latest_time = 0
+        self.average_start = 0
+        self.average_end = 0
+        self.gap_count = 0
+        self.days_of_class = 0
+
 def compute_statistics(schedule_object):
     """This method takes in a schedule object that already has a list of sections 
     and calculates statistics that will be used to rank schedules later on."""
@@ -181,16 +194,3 @@ def sort_schedules(schedule_list, primary_compare, secondary_compare):
     """Compares two sections using the commpare_generic() helper method."""
     return sorted(schedule_list, cmp=lambda s1, s2: 
                   compare_generic(s1, s2, primary_compare, secondary_compare))
-
-class Schedule:
-    """This class holds a schedule, which is a list of sections, as well as a
-    number of statistics about the schedule. It takes in a schedule as it is
-    initialized and then compute_statistics is called on it."""
-    def __init__(self, schedule):
-        self.schedule = schedule
-        self.earliest_time = 0
-        self.latest_time = 0
-        self.average_start = 0
-        self.average_end = 0
-        self.gap_count = 0
-        self.days_of_class = 0
