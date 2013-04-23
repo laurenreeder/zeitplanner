@@ -91,6 +91,8 @@
                                                "classes": classes
                                            }
 
+                                $("#data").html("Loading...");
+
                                 $.ajax({
                                     url: 'http://localhost:5000/api/schedule/',
                                     data: data,
@@ -111,6 +113,7 @@
                                     });
                                     if ("error" in result) {
                                         for (var i = 0; i < result["error"].length; i++) {
+                                            $("#data").html("Invalid input.");
                                             console.log($("[name='" + result["error"][i] + "']"))
                                             $("[name='" + result["error"][i] + "']").css("background-color", "#FF6666");
                                         }
