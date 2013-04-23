@@ -141,7 +141,7 @@ def validate(class_dict):
 
 if __name__ == "__main__":
 
-     # Check if the data file already exists
+    # Check if the data file already exists
     # If not, scrape the course data and store it locally
     if not os.path.exists("course_data.pickle"):
         COURSE_DATA = data_scraper.parse_course_data()
