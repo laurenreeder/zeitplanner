@@ -27,9 +27,9 @@ def support_jsonp(f):
             return f(*args, **kwargs)
     return decorated_function
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+# @app.route("/")
+# def index():
+    # return render_template("penn_scheduler.html")
 
 @app.route("/api/schedule/", methods=["GET"])
 @support_jsonp
