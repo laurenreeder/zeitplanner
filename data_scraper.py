@@ -347,6 +347,7 @@ class Section:
         self.instructor = None
         self.instructor_quality = None
         self.type = None
+        # list of meetings, or None if the meeting information is TBA
         self.meetings = []
     
     def add_meeting(self, meeting):
