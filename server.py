@@ -1,6 +1,6 @@
 import colorsys, math, pickle, os, re
 
-from flask import current_app, Flask, jsonify, render_template, request
+from flask import current_app, Flask, jsonify, request
 from functools import wraps
 
 import data_scraper, scheduler
