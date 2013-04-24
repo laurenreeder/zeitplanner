@@ -9,11 +9,11 @@ The purpose of ZeitPlanner is to help Penn students plan out optimal schedules g
 
 **Terminology:**
 
-* Department: An academic department at UPenn, e.g. CIS.
-* Course: A course within a department, e.g. CIS-192.
-* Section: One specific section of a course, e.g. CIS-192-001.
-* Group: A collection of course sections. If a course has more than one group, students must pick all sections for that course (e.g. the lecture, recitation, etc.) from the same group.
-* Meeting: The meeting time, day(s), and location of a single class within a section. Courses that meet at different times on different days of the week have more than one meeting.
+* **Department:** An academic department at UPenn, e.g. CIS.
+* **Course:** A course within a department, e.g. CIS-192.
+* **Section:** One specific section of a course, e.g. CIS-192-001.
+* **Group:** A collection of course sections. If a course has more than one group, students must pick all sections for that course (e.g. the lecture, recitation, etc.) from the same group.
+* **Meeting:** The meeting time, day(s), and location of a single class within a section. Courses that meet at different times on different days of the week have more than one meeting.
 
 **Project Features:**
 
