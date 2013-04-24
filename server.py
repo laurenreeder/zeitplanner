@@ -336,4 +336,4 @@ if __name__ == "__main__":
     scheduler.COURSE_DATA = COURSE_DATA
 
     # Debug mode should be turned off when you are finished
-    app.run(debug=True)
+    app.run(debug=False)
