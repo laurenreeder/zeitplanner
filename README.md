@@ -25,7 +25,7 @@ The third core component of our project was the server, which was built on top o
 
 **Running Instructions:**
 
-1.  Run "python server.py" in the command line. Ensure that the server is running on localhost on port 5000. If this is the first time the server is being run, it will automatically scrape Penn's course data and store it to disk for future use.
+1.  Run "python server.py" in the command line. Ensure that the server is running on localhost on port 5000. If this is the first time the server is being run, it will automatically scrape Penn's course data and store it to disk for future reference.
 
 2.  Open penn_scheduler.html, the main webpage of the application. If possible, Google Chrome should be used to ensure that the schedule tables are rendered properly.
 
