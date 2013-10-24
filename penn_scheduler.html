@@ -1,0 +1,139 @@
+<html>
+
+    <head>
+        <title>Penn Scheduler</title>
+        <style type="text/css">
+            * {
+                font-family: Georgia, sans-serif;
+                text-align: center;
+            }
+            .centerVertically {
+                display: table-cell;
+                vertical-align: middle;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="container" align="center" style="width:950px; margin-left:auto; margin-right:auto;">
+            <div id="header" class="centerVertically" style="width:950px; height:50px; background-color:navy; color:white; font-size:50;">ZeitPlanner</div>
+            <br />
+            <div id="internalContainer" style="width:950px;">
+                <div id="input" style="float:left; width:*; background-color:white; padding:10px; border:3px black solid;">
+                    <div id="stylized" class="myform">
+                        <form name="form" id="form">
+                            <div id="classes">
+                                <div>Class 1&nbsp;&nbsp;
+                                    <input type="text" name="class1">
+                                </div>
+                            </div>
+                            <input type="button" value="Add another class" onClick="addInput('classes');">
+                            <br />
+                            <br />
+                            <br />Primary Preference
+                            <br />
+                            <select id="primaryCompare">
+                                <option value="early" selected>Early Classes</option>
+                                <option value="late">Late Classes</option>
+                                <option value="compact">Minimize Spread</option>
+                                <option value="minGaps">Minimize Gaps</option>
+                                <option value="minDays">Minimize Number of Days</option>
+                            </select>
+                            <br />
+                            <br />Secondary Preference
+                            <br />
+                            <select id="secondaryCompare">
+                                <option value="early">Early Classes</option>
+                                <option value="late">Late Classes</option>
+                                <option value="compact">Minimize Spread</option>
+                                <option value="minGaps" selected>Minimize Gaps</option>
+                                <option value="minDays">Minimize Number of Days</option>
+                            </select>
+                            <br />
+                            <br />
+                            <input type="submit" value="Submit">
+                        </form>
+                        <script src="jquery.min.js"></script>
+                        <script type="text/javascript">
+                            var counterClasses = 1;
+
+                            function addInput(divName) {
+                                if (divName == "classes") {
+                                    var newdiv = document.createElement('div');
+                                    var name = "class" + (counterClasses + 1);
+                                    newdiv.innerHTML = "Class " + (counterClasses + 1) + "&nbsp&nbsp;&nbsp;<input type='text' name=" + name + ">";
+                                    document.getElementById(divName).appendChild(newdiv);
+                                    counterClasses++;
+                                }
+                            };
+
+                            $("#form").submit(function (event) {
+                                // Stop form from submitting normally
+                                event.preventDefault();
+
+                                classes = new Array();
+                                $("#classes > div > input").each(function (i, obj) {
+                                    if (obj.type == "text") {
+                                        if (obj.name.indexOf("class") != -1) {
+                                            if (obj.value.trim() != "") {
+                                                classes.push(obj.name + ":" + obj.value);
+                                            }
+                                        }
+                                    }
+                                });
+
+                                var data = {
+                                    "primaryCompare": $("#primaryCompare").val(),
+                                    "secondaryCompare": $("#secondaryCompare").val(),
+                                    "classes": classes
+                                }
+
+                                $("#data").html("Loading...");
+
+                                $.ajax({
+                                    url: 'http://127.0.0.1:5000/api/schedule/',
+                                    data: data,
+                                    dataType: 'jsonp',
+                                    success: process_result
+                                });
+
+                                function process_result(result) {
+                                    // Reset the background color of each input field to white
+                                    $("[name*='class']").each(function (i, obj) {
+                                        if (obj.type == "text") {
+                                            if (obj.name.indexOf("class") != -1) {
+                                                console.log(obj.name);
+                                                obj.style.backgroundColor = "#FFFFFF";
+                                            }
+                                        }
+                                    });
+
+                                    // If there is an error, highlight the invalid fields
+                                    if ("error" in result) {
+                                        for (var i = 0; i < result["error"].length; i++) {
+                                            $("#data").html("Invalid input.");
+                                            console.log($("[name='" + result["error"][i] + "']"))
+                                            $("[name='" + result["error"][i] + "']").css("background-color", "#FF6666");
+                                        }
+                                    }
+
+                                    // Otherwise, display the result
+                                    else if ("result" in result) {
+                                        $("#data").html(result["result"]);
+                                    }
+                                }
+                            });
+                        </script>
+                    </div>
+                </div>
+                <div id="output" style="float:right">
+                    <div id="data"></div>
+                </div>
+            </div>
+            <br clear="all" />
+            <br clear="all" />
+            <div id="footer" class="centerVertically" style="width:950px; height:50px; background-color:gray; color:white; font-size:16;">Nina Lu, Lauren Reeder, Mitchell Stern, Dylan Sun</div>
+        </div>
+    </body>
+
+</html>
